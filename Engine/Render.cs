@@ -83,12 +83,6 @@ namespace Engine
             }
         }
 
-        public static void DrawPixel(Vector2I position, Color color)
-        {
-            DrawText(position, ' ');
-            DrawBackgroundColor(position, color);
-        }
-
         private static bool GetIndex(Vector2I position, out int index)
         {
             index = position.y * Game.Size.x + position.x;
