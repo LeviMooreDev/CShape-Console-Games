@@ -1,20 +1,24 @@
 ﻿using System;
+using System.Threading;
 using Engine;
 
 namespace TestGame
 {
     class Program
     {
-        private static Game game;
-
         static void Main(string[] args)
         {
             int width = Console.LargestWindowWidth / 2;
             int height = Console.LargestWindowHeight / 2;
 
-            game = new Game("Test Game", new Vector2I(120, 30));
-            game.OnUpdate += Update;
-            game.Start();
+            Game.OnStart += Start;
+            Game.OnUpdate += Update;
+            Game.Begin("Test Game", new Vector2I(120, 30));
+        }
+
+        private static void Start()
+        {
+
         }
 
         private static void Update()
@@ -22,15 +26,35 @@ namespace TestGame
             Random random = new Random();
             Array colorValues = Enum.GetValues(typeof(Color));
 
-            for (int x = 0; x < game.size.x; x++)
+            Render.DrawText(Vector2I.Zero, "hej med dig!");
+
+            if (Input.KeyHold(ConsoleKey.A))
             {
-                for (int y = 0; y < game.size.y; y++)
+                for (int x = 0; x < Game.Size.x; x++)
                 {
-                    char text = random.Next(0, 10).ToString()[0];
-                    Color textColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
-                    Color backgroundColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
-                    game.Draw(text, new Vector2I(x, y), textColor, backgroundColor);
+                    for (int y = 0; y < Game.Size.y; y++)
+                    {
+                        char text = random.Next(0, 10).ToString()[0];
+                        Render.DrawText(new Vector2I(x, y), text);
+                    }
                 }
+            }
+            if (Input.KeyHold(ConsoleKey.S))
+            {
+                for (int x = 0; x < Game.Size.x; x++)
+                {
+                    for (int y = 0; y < Game.Size.y; y++)
+                    {
+                        Color textColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
+                        Color backgroundColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
+                        Render.DrawTextColor(new Vector2I(x, y), textColor);
+                        Render.DrawBackgroundColor(new Vector2I(x, y), backgroundColor);
+                    }
+                }
+            }
+            if (Input.KeyHold(ConsoleKey.D))
+            {
+                Render.Clear();
             }
         }
     }
