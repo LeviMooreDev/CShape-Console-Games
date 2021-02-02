@@ -1,4 +1,4 @@
-namespace Engine
+﻿namespace Engine
 {
     public struct Vector2I
     {
@@ -22,4 +22,30 @@ namespace Engine
             this.x = x;
             this.y = y;
         }
+
+        public static Vector2I operator +(Vector2I a, Vector2I b)
+        {
+            return new Vector2I(a.x + b.x, a.y + b.y);
+        }
+        public static Vector2I operator -(Vector2I a, Vector2I b)
+        {
+            return new Vector2I(a.x - b.x, a.y - b.y);
+        }
+        public static Vector2I operator *(Vector2I a, Vector2I b)
+        {
+            return new Vector2I(a.x * b.x, a.y * b.y);
+        }
+        public static Vector2I operator *(Vector2I a, int b)
+        {
+            return new Vector2I(a.x * b, a.y * b);
+        }
+        public static Vector2I operator /(Vector2I a, Vector2I b)
+        {
+            return new Vector2I(a.x * b.x, a.y * b.y);
+        }
+        public static Vector2I operator /(Vector2I a, int b)
+        {
+            return new Vector2I(a.x * b, a.y * b);
+        }
+    }
 }
