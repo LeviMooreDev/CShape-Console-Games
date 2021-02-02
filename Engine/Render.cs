@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Engine
 {
@@ -18,6 +19,9 @@ namespace Engine
             colorBuffer = new ushort[bufferLength];
             Clear();
 
+            SetFont();
+            CenterWindow();
+
             consoleHandle = Kernel32.Buffer.CreateConsoleScreenBuffer(0x80000000 | 0x40000000, 0, IntPtr.Zero, 1, IntPtr.Zero);
             Kernel32.Buffer.SetConsoleActiveScreenBuffer(consoleHandle);
         }
@@ -25,6 +29,60 @@ namespace Engine
         {
             Kernel32.Buffer.WriteConsoleOutputCharacter(consoleHandle, new string(textBuffer), (uint)bufferLength, dwWriteCoord, out _);
             Kernel32.Buffer.WriteConsoleOutputAttribute(consoleHandle, colorBuffer, (uint)bufferLength, dwWriteCoord, out _);
+        }
+
+        private static void SetFont()
+        {
+            //font
+            short fontSize = 8;
+            Kernel32.Font.CONSOLE_FONT_INFOEX font = new Kernel32.Font.CONSOLE_FONT_INFOEX();
+            font.cbSize = (uint)Marshal.SizeOf(font);
+            font.FaceName = "Terminal";
+            Kernel32.Font.GetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
+
+            //try to set window and buffer size, if it fails we decrease the font size and try again
+            while (true)
+            {
+                if (fontSize < 1)
+                {
+                    throw new Exception("Unable to find a font size that allows for the given game size");
+                }
+
+                try
+                {
+                    Console.SetWindowSize(Game.Size.x, Game.Size.y);
+                    Console.SetBufferSize(Game.Size.x, Game.Size.y);
+                    break;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    fontSize--;
+                    font.dwFontSize.Y = fontSize;
+                    font.dwFontSize.X = fontSize;
+                    Kernel32.Font.SetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
+                }
+            }
+        }
+        private static void CenterWindow()
+        {
+            //get console size
+            IntPtr consoleId = Kernel32.Window.GetForegroundWindow();
+            Kernel32.Generic.RECT consoleRect = new Kernel32.Generic.RECT();
+            Kernel32.Window.GetWindowRect(consoleId, ref consoleRect);
+            int consoleWidth = consoleRect.right - consoleRect.left;
+            int consoleHeight = consoleRect.bottom - consoleRect.top;
+
+            //get screen size
+            IntPtr desktopId = Kernel32.Window.GetDesktopWindow();
+            Kernel32.Generic.RECT screenRect = new Kernel32.Generic.RECT();
+            Kernel32.Window.GetWindowRect(desktopId, ref screenRect);
+            int screenWidth = screenRect.right - screenRect.left;
+            int screenHeight = screenRect.bottom - screenRect.top;
+
+            //move console to center of screen
+            Kernel32.Window.MoveWindow(consoleId, screenWidth / 2 - consoleWidth / 2,
+                                           screenHeight / 2 - consoleHeight / 2,
+                                           consoleWidth, consoleHeight, true);
         }
 
         public static void Clear()
