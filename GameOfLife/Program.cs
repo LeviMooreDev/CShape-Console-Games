@@ -6,15 +6,15 @@ namespace GameOfLife
 {
     class Program
     {
-        static bool run = false;
-        static bool[,] corrent;
-        static bool[,] next;
+        private static bool run = true;
+        private static bool[,] corrent;
+        private static bool[,] next;
 
         static void Main(string[] args)
         {
             Game.OnStart += Start;
             Game.OnUpdate += Update;
-            Game.Begin("Game of Life", new Vector2I(200, 50));
+            Game.Begin("Game of Life", new Vector2I(100, 100));
         }
 
         private static void Start()
@@ -57,7 +57,6 @@ namespace GameOfLife
                         corrent[x, y] = next[x, y];
                     }
                 }
-
                 for (int x = 0; x < Game.Size.x; x++)
                 {
                     for (int y = 0; y < Game.Size.y; y++)
@@ -105,18 +104,21 @@ namespace GameOfLife
                 Thread.Sleep(30);
             }
 
-            if (Input.MouseLeftHold)
+            if (Input.MouseLeftHold || Input.MouseRightHold)
             {
                 Vector2I positon = Input.MousePosition;
                 if (positon.x >= 0 && positon.y >= 0)
                 {
                     if (positon.x < Game.Size.x && positon.y < Game.Size.y)
                     {
-                        next[positon.x, positon.y] = true;
-                        Render.DrawBackgroundColor(new Vector2I(positon.x, positon.y), Color.White);
+                        next[positon.x, positon.y] = Input.MouseLeftHold;
+                        Render.DrawBackgroundColor(new Vector2I(positon.x, positon.y), next[positon.x, positon.y] ? Color.White : Color.Black);
                     }
                 }
             }
+            Render.DrawText(Input.LastMousePosition, ' ');
+            Render.DrawText(Input.MousePosition, 'x');
+            Render.DrawTextColor(Input.MousePosition, Color.Green);
         }
     }
 }
