@@ -1,66 +1,25 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Engine
 {
-    public class Game
+    public static class Game
     {
-        public readonly Vector2I size;
+        public static Vector2I Size { get; private set; }
 
-        private readonly int bufferLength;
-        private readonly char[] textBuffer;
-        /// <summary>
-        /// The colors applied to textBuffer. See Color enum for values.
-        /// </summary>
-        private readonly ushort[] colorBuffer;
-        /// <summary>
-        /// console window handle used when calling Kernel32 methods
-        /// </summary>
-        private readonly IntPtr consoleHandle;
+        public static event Action OnStart;
+        public static event Action OnUpdate;
 
-        private int frameCount;
-
-        /// <summary>
-        /// triggered every frame
-        /// </summary>
-        public event Action OnUpdate;
-
-        public Game(string title, Vector2I size)
-        {
-            Console.Title = title;
-            this.size = size;
-
-            SetWindowSize();
-            CenterWindow();
-
-            //create buffers and set ours as the active console buffer
-            bufferLength = size.x * size.y;
-            textBuffer = new char[bufferLength];
-            colorBuffer = new ushort[bufferLength];
-            consoleHandle = Kernel32.CreateConsoleScreenBuffer(0x80000000 | 0x40000000, 0, IntPtr.Zero, 1, IntPtr.Zero);
-            Kernel32.SetConsoleActiveScreenBuffer(consoleHandle);
-
-            //start thread that counts the frame rate. this needs to be replaced.
-            new Thread(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    Console.Title = $"{title} - FPS: {frameCount}";
-                    frameCount = 0;
-                }
-            }).Start();
-        }
-    
-        private void SetWindowSize()
+        private static void SetWindowSize()
         {
             short fontSize = 16;
 
             //get console font
-            Kernel32.CONSOLE_FONT_INFOEX font = new Kernel32.CONSOLE_FONT_INFOEX();
+            Kernel32.Font.CONSOLE_FONT_INFOEX font = new Kernel32.Font.CONSOLE_FONT_INFOEX();
             font.cbSize = (uint)Marshal.SizeOf(font);
-            Kernel32.GetCurrentConsoleFontEx(Kernel32.GetStdHandle(Kernel32.StdHandle.OutputHandle), false, ref font);
+            Kernel32.Font.GetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
 
             //try to set window and buffer size, if it fails we decrease the font size and try again
             while (true)
@@ -72,8 +31,8 @@ namespace Engine
 
                 try
                 {
-                    Console.SetWindowSize(size.x, size.y);
-                    Console.SetBufferSize(size.x, size.y);
+                    Console.SetWindowSize(Size.x, Size.y);
+                    Console.SetBufferSize(Size.x, Size.y);
                     break;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -81,28 +40,28 @@ namespace Engine
                     fontSize--;
                     font.dwFontSize.Y = fontSize;
                     font.dwFontSize.X = fontSize;
-                    Kernel32.SetCurrentConsoleFontEx(Kernel32.GetStdHandle(Kernel32.StdHandle.OutputHandle), false, ref font);
+                    Kernel32.Font.SetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
                 }
             }
         }
-        private void CenterWindow()
+        private static void CenterWindow()
         {
             //get console size
-            IntPtr consoleId = Kernel32.GetForegroundWindow();
-            Kernel32.RECT consoleRect = new Kernel32.RECT();
-            Kernel32.GetWindowRect(consoleId, ref consoleRect);
+            IntPtr consoleId = Kernel32.Window.GetForegroundWindow();
+            Kernel32.Generic.RECT consoleRect = new Kernel32.Generic.RECT();
+            Kernel32.Window.GetWindowRect(consoleId, ref consoleRect);
             int consoleWidth = consoleRect.right - consoleRect.left;
             int consoleHeight = consoleRect.bottom - consoleRect.top;
 
             //get screen size
-            IntPtr desktopId = Kernel32.GetDesktopWindow();
-            Kernel32.RECT screenRect = new Kernel32.RECT();
-            Kernel32.GetWindowRect(desktopId, ref screenRect);
+            IntPtr desktopId = Kernel32.Window.GetDesktopWindow();
+            Kernel32.Generic.RECT screenRect = new Kernel32.Generic.RECT();
+            Kernel32.Window.GetWindowRect(desktopId, ref screenRect);
             int screenWidth = screenRect.right - screenRect.left;
             int screenHeight = screenRect.bottom - screenRect.top;
 
             //move console to center of screen
-            Kernel32.MoveWindow(consoleId, screenWidth / 2 - consoleWidth / 2,
+            Kernel32.Window.MoveWindow(consoleId, screenWidth / 2 - consoleWidth / 2,
                                            screenHeight / 2 - consoleHeight / 2,
                                            consoleWidth, consoleHeight, true);
         }
@@ -110,32 +69,24 @@ namespace Engine
         /// <summary>
         /// Start the game update and render loops
         /// </summary>
-        public void Start()
+        public static void Begin(string title, Vector2I size)
         {
-            Kernel32.COORD dwWriteCoord = new Kernel32.COORD(0, 0);
+            Console.Title = title;
+            Size = size;
+
+            SetWindowSize();
+            CenterWindow();
+
+            Render.Start();
+            Input.Start();
+            OnStart?.Invoke();
+
             while (true)
             {
-                frameCount++;
-
+                Input.Update();
                 OnUpdate?.Invoke();
-
-                Kernel32.WriteConsoleOutputCharacter(consoleHandle, new string(textBuffer), (uint)bufferLength, dwWriteCoord, out _);
-                Kernel32.WriteConsoleOutputAttribute(consoleHandle, colorBuffer, (uint)bufferLength, dwWriteCoord, out _);
-
-                Console.WindowTop = 0;
-                Thread.Sleep(1000/60);
+                Render.Update();
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="character">Needs to be Unicode</param>
-        public void Draw(char character, Vector2I position, Color foregroundColor = Color.White, Color backgroundColor = Color.Black)
-        {
-            int index = position.y * size.x + position.x;
-                        textBuffer[index] = character;
-            colorBuffer[index] = (ushort)((ushort)foregroundColor | (ushort)backgroundColor << 4);
         }
     }
 }
