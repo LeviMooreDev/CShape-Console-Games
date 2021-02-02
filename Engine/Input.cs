@@ -9,6 +9,7 @@ namespace Engine
     {
         private static Vector2I mousePosition = new Vector2I(0, 0);
         public static Vector2I MousePosition { get; private set; } = new Vector2I(0, 0);
+        public static Vector2I LastMousePosition { get; private set; } = new Vector2I(0, 0);
 
         private static bool mouseLeft;
         public static bool MouseLeftDown { get; private set; }
@@ -138,6 +139,7 @@ namespace Engine
         }
         internal static void Update()
         {
+            LastMousePosition = MousePosition;
             MousePosition = mousePosition;
 
             MouseLeftUp = !mouseLeft && MouseLeftHold;
