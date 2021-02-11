@@ -36,9 +36,12 @@ namespace Engine
             //font
             short fontSize = 8;
             Kernel32.Font.CONSOLE_FONT_INFOEX font = new Kernel32.Font.CONSOLE_FONT_INFOEX();
-            font.cbSize = (uint)Marshal.SizeOf(font);
-            font.FaceName = "Terminal";
             Kernel32.Font.GetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
+            font.FaceName = "Terminal";
+            font.dwFontSize.Y = fontSize;
+            font.dwFontSize.X = fontSize;
+            font.cbSize = (uint)Marshal.SizeOf(font);
+            Kernel32.Font.SetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
 
             //try to set window and buffer size, if it fails we decrease the font size and try again
             while (true)
@@ -59,6 +62,7 @@ namespace Engine
                     fontSize--;
                     font.dwFontSize.Y = fontSize;
                     font.dwFontSize.X = fontSize;
+                    font.cbSize = (uint)Marshal.SizeOf(font);
                     Kernel32.Font.SetCurrentConsoleFontEx(Kernel32.Generic.GetStdHandle(Kernel32.Generic.StdHandle.Output), false, ref font);
                 }
             }
