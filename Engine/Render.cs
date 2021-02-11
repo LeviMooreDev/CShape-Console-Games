@@ -11,7 +11,7 @@ namespace Engine
         private static int bufferLength;
         private static char[] textBuffer;
         private static ushort[] colorBuffer;
-        
+
         internal static void Start()
         {
             bufferLength = Game.Size.x * Game.Size.y;
@@ -97,6 +97,9 @@ namespace Engine
                 colorBuffer[i] = (ushort)Color.White | (ushort)Color.Black << 4;
             }
         }
+
+        //all draw methods needs a better way of handling Vector2I, Vector2F, and float
+
         public static void DrawText(Vector2I position, char character)
         {
             if (GetIndex(position, out int index))
@@ -114,6 +117,61 @@ namespace Engine
                 }
             }
         }
+        public static void DrawText(Vector2F position, char character)
+        {
+            if (GetIndex(new Vector2I(position.x, position.y), out int index))
+            {
+                textBuffer[index] = character;
+            }
+        }
+        public static void DrawText(Vector2F position, string text)
+        {
+            Vector2I positionI = new Vector2I(position.x, position.y);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (GetIndex(positionI + Vector2I.Right * i, out int index))
+                {
+                    textBuffer[index] = text[i];
+                }
+            }
+        }
+        public static void DrawText(int x, int y, char character)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
+            {
+                textBuffer[index] = character;
+            }
+        }
+        public static void DrawText(int x, int y, string text)
+        {
+            Vector2I position = new Vector2I(x, y);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (GetIndex(position + Vector2I.Right * i, out int index))
+                {
+                    textBuffer[index] = text[i];
+                }
+            }
+        }
+        public static void DrawText(float x, float y, char character)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
+            {
+                textBuffer[index] = character;
+            }
+        }
+        public static void DrawText(float x, float y, string text)
+        {
+            Vector2I position = new Vector2I(x, y);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (GetIndex(position + Vector2I.Right * i, out int index))
+                {
+                    textBuffer[index] = text[i];
+                }
+            }
+        }
+
         public static void DrawBackgroundColor(Vector2I position, Color color)
         {
             //how to get only text color from colorBuffer (right 4)
@@ -128,6 +186,31 @@ namespace Engine
                 colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
             }
         }
+        public static void DrawBackgroundColor(Vector2F position, Color color)
+        {
+            if (GetIndex(new Vector2I(position.x, position.y), out int index))
+            {
+                int textColor = (colorBuffer[index] | 240) ^ 240;
+                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
+            }
+        }
+        public static void DrawBackgroundColor(int x, int y, Color color)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
+            {
+                int textColor = (colorBuffer[index] | 240) ^ 240;
+                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
+            }
+        }
+        public static void DrawBackgroundColor(float x, float y, Color color)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
+            {
+                int textColor = (colorBuffer[index] | 240) ^ 240;
+                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
+            }
+        }
+
         public static void DrawTextColor(Vector2I position, Color color)
         {
             //how to get only background color from colorBuffer (left 4)
@@ -139,6 +222,30 @@ namespace Engine
             //int backgroundColor = (colorBuffer[index] | 15) ^ 15;
 
             if (GetIndex(position, out int index))
+            {
+                int backgroundColor = colorBuffer[index] >> 4 << 4;
+                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
+            }
+        }
+        public static void DrawTextColor(Vector2F position, Color color)
+        {
+            if (GetIndex(new Vector2I(position.x, position.y), out int index))
+            {
+                int backgroundColor = colorBuffer[index] >> 4 << 4;
+                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
+            }
+        }
+        public static void DrawTextColor(int x, int y, Color color)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
+            {
+                int backgroundColor = colorBuffer[index] >> 4 << 4;
+                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
+            }
+        }
+        public static void DrawTextColor(float x, float y, Color color)
+        {
+            if (GetIndex(new Vector2I(x, y), out int index))
             {
                 int backgroundColor = colorBuffer[index] >> 4 << 4;
                 colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
