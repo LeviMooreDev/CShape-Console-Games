@@ -12,6 +12,12 @@ namespace Engine
         public static event Action OnStart;
         public static event Action OnUpdate;
 
+        private static DateTime lastTime = DateTime.Now;
+        private static DateTime currentTime = DateTime.Now;
+        private static DateTime nextFrameRateUpdate = DateTime.Now;
+        private static int frameRate;
+        public static float DeltaTime { get; private set; }
+
         /// <summary>
         /// Start the game update and render loops
         /// </summary>
@@ -24,8 +30,20 @@ namespace Engine
             Input.Start();
             OnStart?.Invoke();
 
+
             while (true)
             {
+                currentTime = DateTime.Now;
+                DeltaTime = (float)currentTime.Subtract(lastTime).TotalSeconds;
+                lastTime = currentTime;
+                frameRate++;
+                if (currentTime >= nextFrameRateUpdate)
+                {
+                    nextFrameRateUpdate = currentTime.AddSeconds(1);
+                    Console.Title = $"{title} - {frameRate}";
+                    frameRate = 0;
+                }
+
                 Input.Update();
                 OnUpdate?.Invoke();
                 Render.Update();
