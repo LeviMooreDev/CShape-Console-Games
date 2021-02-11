@@ -16,6 +16,11 @@
             this.x = x;
             this.y = y;
         }
+        public Vector2I(float x, float y)
+        {
+            this.x = (int)x;
+            this.y = (int)y;
+        }
 
         public void Set(int x, int y)
         {
