@@ -40,15 +40,12 @@ namespace FirstPerson
             "#            # #",
             "#  #         # #",
             "#              #",
-            "#              #",
-            "#              #",
             "#       #      #",
             "#       #      #",
             "#       ##     #",
             "#       #     ##",
             "#       #      #",
             "#             ##",
-            "#              #",
             "#####          #",
             "#              #",
             "################"
@@ -103,7 +100,7 @@ namespace FirstPerson
                 targetPosition += Vector2F.Up * MathF.Sin(-playerAngle) * playerSpeed * Game.DeltaTime;
                 targetPosition += Vector2F.Right * MathF.Cos(-playerAngle) * playerSpeed * Game.DeltaTime;
             }
-            if (map[(int)targetPosition.x][(int)targetPosition.y] != mapWall)
+            if (map[(int)targetPosition.y][(int)targetPosition.x] != mapWall)
             {
                 playerPosition = targetPosition;
             }
@@ -144,7 +141,7 @@ namespace FirstPerson
                     else
                     {
                         //hit wall
-                        if (map[hit.x][hit.y] == mapWall)
+                        if (map[hit.y][hit.x] == mapWall)
                         {
                             break;
                         }
@@ -215,11 +212,11 @@ namespace FirstPerson
             Vector2I offset = new Vector2I(Game.Size.x - map[0].Length, 0);
 
             //map
-            for (int x = 0; x < map[0].Length; x++)
+            for (int x = 0; x < map.Length; x++)
             {
-                for (int y = 0; y < map.Length; y++)
+                for (int y = 0; y < map[0].Length; y++)
                 {
-                    Vector2I pos = new Vector2I(x, y) + offset;
+                    Vector2I pos = new Vector2I(y, x) + offset;
 
                     Render.DrawBackgroundColor(pos, Color.Black);
                     Render.DrawTextColor(pos, Color.White);
