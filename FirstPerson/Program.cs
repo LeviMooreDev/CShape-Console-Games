@@ -55,7 +55,7 @@ namespace FirstPerson
         };
 
         //player
-        private static Vector2F playerPosition = new Vector2F(2, 8);
+        private static Vector2 playerPosition = new Vector2(2, 8);
         private static float playerAngle = 1.5708f;
         private static float playerSpeed = 2;
         private static float fov = 0.6f;
@@ -68,9 +68,9 @@ namespace FirstPerson
         static void Main(string[] args)
         {
             Game.OnUpdate += Update;
-            //Game.Begin("FPS", new Vector2I(80, 40));
-            Game.Begin("FPS", new Vector2I(120, 80));
-            //Game.Begin("FPS", new Vector2I(300, 150));
+            //Game.Begin("FPS", new Vector2(80, 40));
+            Game.Begin("FPS", new Vector2(120, 80));
+            //Game.Begin("FPS", new Vector2(300, 150));
         }
         private static void Update()
         {
@@ -82,26 +82,26 @@ namespace FirstPerson
         private static void Movement()
         {
             //walk
-            Vector2F targetPosition = playerPosition;
+            Vector2 targetPosition = playerPosition;
             if (Input.KeyHold(ConsoleKey.W))
             {
-                targetPosition += Vector2F.Right * MathF.Sin(playerAngle) * playerSpeed * Game.DeltaTime;
-                targetPosition += Vector2F.Up * MathF.Cos(playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition += Vector2.Right * MathF.Sin(playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition += Vector2.Up * MathF.Cos(playerAngle) * playerSpeed * Game.DeltaTime;
             }
             if (Input.KeyHold(ConsoleKey.S))
             {
-                targetPosition -= Vector2F.Right * MathF.Sin(playerAngle) * playerSpeed * Game.DeltaTime;
-                targetPosition -= Vector2F.Up * MathF.Cos(playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition -= Vector2.Right * MathF.Sin(playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition -= Vector2.Up * MathF.Cos(playerAngle) * playerSpeed * Game.DeltaTime;
             }
             if (Input.KeyHold(ConsoleKey.A))
             {
-                targetPosition -= Vector2F.Up * MathF.Sin(-playerAngle) * playerSpeed * Game.DeltaTime;
-                targetPosition -= Vector2F.Right * MathF.Cos(-playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition -= Vector2.Up * MathF.Sin(-playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition -= Vector2.Right * MathF.Cos(-playerAngle) * playerSpeed * Game.DeltaTime;
             }
             if (Input.KeyHold(ConsoleKey.D))
             {
-                targetPosition += Vector2F.Up * MathF.Sin(-playerAngle) * playerSpeed * Game.DeltaTime;
-                targetPosition += Vector2F.Right * MathF.Cos(-playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition += Vector2.Up * MathF.Sin(-playerAngle) * playerSpeed * Game.DeltaTime;
+                targetPosition += Vector2.Right * MathF.Cos(-playerAngle) * playerSpeed * Game.DeltaTime;
             }
             if (map[(int)targetPosition.x][(int)targetPosition.y] != mapWall)
             {
@@ -124,15 +124,15 @@ namespace FirstPerson
             {
                 //raycast forward
                 float rayAngle = playerAngle - fov / 2f + (float)x / Game.Size.x * fov;
-                Vector2F rayDirection = new Vector2F(MathF.Sin(rayAngle), MathF.Cos(rayAngle));
+                Vector2 rayDirection = new Vector2(MathF.Sin(rayAngle), MathF.Cos(rayAngle));
                 float distanceToWall = 0;
-                Vector2I hit;
+                Vector2 hit;
 
                 while (distanceToWall < rayMaxDepth)
                 {
                     //step hit position forward
                     distanceToWall += rayStepSize;
-                    hit = new Vector2I(playerPosition.x + rayDirection.x * distanceToWall, playerPosition.y + rayDirection.y * distanceToWall);
+                    hit = new Vector2(playerPosition.x + rayDirection.x * distanceToWall, playerPosition.y + rayDirection.y * distanceToWall);
 
                     //if outside map
                     if (hit.x < 0 || hit.x >= map[0].Length || hit.y < 0 || hit.y >= map.Length)
@@ -144,7 +144,7 @@ namespace FirstPerson
                     else
                     {
                         //hit wall
-                        if (map[hit.x][hit.y] == mapWall)
+                        if (map[hit.XI][hit.YI] == mapWall)
                         {
                             break;
                         }
@@ -153,11 +153,11 @@ namespace FirstPerson
 
                 //draw vertical
                 int ceilingStart = (int)(Game.Size.y / 2f - Game.Size.y / distanceToWall);
-                int floorStart = Game.Size.y - ceilingStart;
+                int floorStart = Game.Size.YI - ceilingStart;
 
                 for (int y = 0; y < Game.Size.y; y++)
                 {
-                    Vector2I pos = new Vector2I(x, y);
+                    Vector2 pos = new Vector2(x, y);
 
                     //ceiling
                     if (y <= ceilingStart)
@@ -212,14 +212,14 @@ namespace FirstPerson
         }
         private static void Minimap()
         {
-            Vector2I offset = new Vector2I(Game.Size.x - map[0].Length, 0);
+            Vector2 offset = new Vector2(Game.Size.x - map[0].Length, 0);
 
             //map
             for (int x = 0; x < map[0].Length; x++)
             {
                 for (int y = 0; y < map.Length; y++)
                 {
-                    Vector2I pos = new Vector2I(x, y) + offset;
+                    Vector2 pos = new Vector2(x, y) + offset;
 
                     Render.DrawBackgroundColor(pos, Color.Black);
                     Render.DrawTextColor(pos, Color.White);
@@ -231,9 +231,9 @@ namespace FirstPerson
             Render.DrawText(playerPosition + offset, mapPlayer);
 
             //next player position
-            Vector2F forwardPosition = playerPosition;
-            forwardPosition += Vector2F.Right * MathF.Sin(playerAngle);
-            forwardPosition += Vector2F.Up * MathF.Cos(playerAngle);
+            Vector2 forwardPosition = playerPosition;
+            forwardPosition += Vector2.Right * MathF.Sin(playerAngle);
+            forwardPosition += Vector2.Up * MathF.Cos(playerAngle);
             Render.DrawTextColor(forwardPosition + offset, Color.Gray);
             Render.DrawText(forwardPosition + offset, mapPlayerForward);
         }

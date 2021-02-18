@@ -14,7 +14,7 @@ namespace Engine
 
         internal static void Start()
         {
-            bufferLength = Game.Size.x * Game.Size.y;
+            bufferLength = Game.Size.XI * Game.Size.YI;
             textBuffer = new char[bufferLength];
             colorBuffer = new ushort[bufferLength];
             Clear();
@@ -53,8 +53,8 @@ namespace Engine
 
                 try
                 {
-                    Console.SetWindowSize(Game.Size.x, Game.Size.y);
-                    Console.SetBufferSize(Game.Size.x, Game.Size.y);
+                    Console.SetWindowSize(Game.Size.XI, Game.Size.YI);
+                    Console.SetBufferSize(Game.Size.XI, Game.Size.YI);
                     break;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -98,38 +98,21 @@ namespace Engine
             }
         }
 
-        //all draw methods needs a better way of handling Vector2I, Vector2F, and float
+        //all draw methods needs a better way of handling Vector2, Vector2F, and float
 
-        public static void DrawText(Vector2I position, char character)
+        public static void DrawText(Vector2 position, char character)
         {
-            if (GetIndex(position, out int index))
+            if (GetIndex(new Vector2(position.x, position.y), out int index))
             {
                 textBuffer[index] = character;
             }
         }
-        public static void DrawText(Vector2I position, string text)
+        public static void DrawText(Vector2 position, string text)
         {
+            Vector2 positionI = new Vector2(position.x, position.y);
             for (int i = 0; i < text.Length; i++)
             {
-                if (GetIndex(position + Vector2I.Right * i, out int index))
-                {
-                    textBuffer[index] = text[i];
-                }
-            }
-        }
-        public static void DrawText(Vector2F position, char character)
-        {
-            if (GetIndex(new Vector2I(position.x, position.y), out int index))
-            {
-                textBuffer[index] = character;
-            }
-        }
-        public static void DrawText(Vector2F position, string text)
-        {
-            Vector2I positionI = new Vector2I(position.x, position.y);
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (GetIndex(positionI + Vector2I.Right * i, out int index))
+                if (GetIndex(positionI + Vector2.Right * i, out int index))
                 {
                     textBuffer[index] = text[i];
                 }
@@ -137,17 +120,17 @@ namespace Engine
         }
         public static void DrawText(int x, int y, char character)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 textBuffer[index] = character;
             }
         }
         public static void DrawText(int x, int y, string text)
         {
-            Vector2I position = new Vector2I(x, y);
+            Vector2 position = new Vector2(x, y);
             for (int i = 0; i < text.Length; i++)
             {
-                if (GetIndex(position + Vector2I.Right * i, out int index))
+                if (GetIndex(position + Vector2.Right * i, out int index))
                 {
                     textBuffer[index] = text[i];
                 }
@@ -155,40 +138,26 @@ namespace Engine
         }
         public static void DrawText(float x, float y, char character)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 textBuffer[index] = character;
             }
         }
         public static void DrawText(float x, float y, string text)
         {
-            Vector2I position = new Vector2I(x, y);
+            Vector2 position = new Vector2(x, y);
             for (int i = 0; i < text.Length; i++)
             {
-                if (GetIndex(position + Vector2I.Right * i, out int index))
+                if (GetIndex(position + Vector2.Right * i, out int index))
                 {
                     textBuffer[index] = text[i];
                 }
             }
         }
 
-        public static void DrawBackgroundColor(Vector2I position, Color color)
+        public static void DrawBackgroundColor(Vector2 position, Color color)
         {
-            //how to get only text color from colorBuffer (right 4)
-            //filter    = 1111 0000
-            //buffer    = 0101 1001
-            // | (or)   = 1111 1001
-            // ^ (excl) = 0000 1001
-
-            if (GetIndex(position, out int index))
-            {
-                int textColor = (colorBuffer[index] | 240) ^ 240;
-                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
-            }
-        }
-        public static void DrawBackgroundColor(Vector2F position, Color color)
-        {
-            if (GetIndex(new Vector2I(position.x, position.y), out int index))
+            if (GetIndex(new Vector2(position.x, position.y), out int index))
             {
                 int textColor = (colorBuffer[index] | 240) ^ 240;
                 colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
@@ -196,7 +165,7 @@ namespace Engine
         }
         public static void DrawBackgroundColor(int x, int y, Color color)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 int textColor = (colorBuffer[index] | 240) ^ 240;
                 colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
@@ -204,32 +173,16 @@ namespace Engine
         }
         public static void DrawBackgroundColor(float x, float y, Color color)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 int textColor = (colorBuffer[index] | 240) ^ 240;
                 colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
             }
         }
 
-        public static void DrawTextColor(Vector2I position, Color color)
+        public static void DrawTextColor(Vector2 position, Color color)
         {
-            //how to get only background color from colorBuffer (left 4)
-            //buffer              = 0101 1001
-            // >> 4 (shift right) = 0000 0101
-            // << 4 (shift left)  = 0101 0000
-
-            //if you want to use or and excl like in DrawBackgroundColor use this line
-            //int backgroundColor = (colorBuffer[index] | 15) ^ 15;
-
-            if (GetIndex(position, out int index))
-            {
-                int backgroundColor = colorBuffer[index] >> 4 << 4;
-                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
-            }
-        }
-        public static void DrawTextColor(Vector2F position, Color color)
-        {
-            if (GetIndex(new Vector2I(position.x, position.y), out int index))
+            if (GetIndex(new Vector2(position.x, position.y), out int index))
             {
                 int backgroundColor = colorBuffer[index] >> 4 << 4;
                 colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
@@ -237,7 +190,7 @@ namespace Engine
         }
         public static void DrawTextColor(int x, int y, Color color)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 int backgroundColor = colorBuffer[index] >> 4 << 4;
                 colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
@@ -245,16 +198,21 @@ namespace Engine
         }
         public static void DrawTextColor(float x, float y, Color color)
         {
-            if (GetIndex(new Vector2I(x, y), out int index))
+            if (GetIndex(new Vector2(x, y), out int index))
             {
                 int backgroundColor = colorBuffer[index] >> 4 << 4;
                 colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
             }
         }
 
-        private static bool GetIndex(Vector2I position, out int index)
+        //public static void DrawLine(Vector2 start, Vector2 end, Color color)
+       // {
+        //    Vector2F dir = (end - start)
+        //}
+
+        private static bool GetIndex(Vector2 position, out int index)
         {
-            index = position.y * Game.Size.x + position.x;
+            index = position.YI * Game.Size.XI + position.XI;
             return true;
         }
     }

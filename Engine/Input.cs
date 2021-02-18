@@ -7,9 +7,9 @@ namespace Engine
 {
     public static class Input
     {
-        private static Vector2I mousePosition = new Vector2I(0, 0);
-        public static Vector2I MousePosition { get; private set; } = new Vector2I(0, 0);
-        public static Vector2I LastMousePosition { get; private set; } = new Vector2I(0, 0);
+        private static Vector2 mousePosition = new Vector2(0, 0);
+        public static Vector2 MousePosition { get; private set; } = new Vector2(0, 0);
+        public static Vector2 LastMousePosition { get; private set; } = new Vector2(0, 0);
 
         private static bool mouseLeft;
         public static bool MouseLeftDown { get; private set; }

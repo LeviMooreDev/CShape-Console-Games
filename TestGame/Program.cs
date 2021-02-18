@@ -13,7 +13,7 @@ namespace TestGame
 
             Game.OnStart += Start;
             Game.OnUpdate += Update;
-            Game.Begin("Test Game", new Vector2I(120, 30));
+            Game.Begin("Test Game", new Vector2(120, 30));
         }
 
         private static void Start()
@@ -26,7 +26,7 @@ namespace TestGame
             Random random = new Random();
             Array colorValues = Enum.GetValues(typeof(Color));
 
-            Render.DrawText(Vector2I.Zero, "hej med dig!");
+            Render.DrawText(Vector2.Zero, "hej med dig!");
 
             if (Input.KeyHold(ConsoleKey.A))
             {
@@ -35,7 +35,7 @@ namespace TestGame
                     for (int y = 0; y < Game.Size.y; y++)
                     {
                         char text = random.Next(0, 10).ToString()[0];
-                        Render.DrawText(new Vector2I(x, y), text);
+                        Render.DrawText(new Vector2(x, y), text);
                     }
                 }
             }
@@ -47,8 +47,8 @@ namespace TestGame
                     {
                         Color textColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
                         Color backgroundColor = (Color)colorValues.GetValue(random.Next(colorValues.Length));
-                        Render.DrawTextColor(new Vector2I(x, y), textColor);
-                        Render.DrawBackgroundColor(new Vector2I(x, y), backgroundColor);
+                        Render.DrawTextColor(new Vector2(x, y), textColor);
+                        Render.DrawBackgroundColor(new Vector2(x, y), backgroundColor);
                     }
                 }
             }
