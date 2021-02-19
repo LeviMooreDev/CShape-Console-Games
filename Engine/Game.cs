@@ -7,7 +7,7 @@ namespace Engine
 {
     public static class Game
     {
-        public static Vector2I Size { get; private set; }
+        public static Vector2 Size { get; private set; }
 
         public static event Action OnStart;
         public static event Action OnUpdate;
@@ -21,7 +21,7 @@ namespace Engine
         /// <summary>
         /// Start the game update and render loops
         /// </summary>
-        public static void Begin(string title, Vector2I size)
+        public static void Begin(string title, Vector2 size)
         {
             Console.Title = title;
             Size = size;

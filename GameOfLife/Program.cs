@@ -14,13 +14,13 @@ namespace GameOfLife
         {
             Game.OnStart += Start;
             Game.OnUpdate += Update;
-            Game.Begin("Game of Life", new Vector2I(100, 100));
+            Game.Begin("Game of Life", new Vector2(100, 100));
         }
 
         private static void Start()
         {
-            corrent = new bool[Game.Size.x, Game.Size.y];
-            next = new bool[Game.Size.x, Game.Size.y];
+            corrent = new bool[Game.Size.XI, Game.Size.YI];
+            next = new bool[Game.Size.XI, Game.Size.YI];
 
             for (int x = 0; x < Game.Size.x; x++)
             {
@@ -97,7 +97,7 @@ namespace GameOfLife
                             next[x, y] = neightbours == 3;
                         }
 
-                        Render.DrawBackgroundColor(new Vector2I(x, y), next[x, y] ? Color.White : Color.Black);
+                        Render.DrawBackgroundColor(new Vector2(x, y), next[x, y] ? Color.White : Color.Black);
                     }
                 }
 
@@ -106,13 +106,13 @@ namespace GameOfLife
 
             if (Input.MouseLeftHold || Input.MouseRightHold)
             {
-                Vector2I positon = Input.MousePosition;
+                Vector2 positon = Input.MousePosition;
                 if (positon.x >= 0 && positon.y >= 0)
                 {
                     if (positon.x < Game.Size.x && positon.y < Game.Size.y)
                     {
-                        next[positon.x, positon.y] = Input.MouseLeftHold;
-                        Render.DrawBackgroundColor(new Vector2I(positon.x, positon.y), next[positon.x, positon.y] ? Color.White : Color.Black);
+                        next[positon.XI, positon.YI] = Input.MouseLeftHold;
+                        Render.DrawBackgroundColor(new Vector2(positon.x, positon.y), next[positon.XI, positon.YI] ? Color.White : Color.Black);
                     }
                 }
             }
