@@ -9,4 +9,10 @@
     <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
