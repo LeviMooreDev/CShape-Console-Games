@@ -19,8 +19,8 @@ namespace GameOfLife
 
         private static void Start()
         {
-            corrent = new bool[Game.Size.XI, Game.Size.YI];
-            next = new bool[Game.Size.XI, Game.Size.YI];
+            corrent = new bool[Game.Size.XInt, Game.Size.YInt];
+            next = new bool[Game.Size.XInt, Game.Size.YInt];
 
             for (int x = 0; x < Game.Size.x; x++)
             {
@@ -111,8 +111,8 @@ namespace GameOfLife
                 {
                     if (positon.x < Game.Size.x && positon.y < Game.Size.y)
                     {
-                        next[positon.XI, positon.YI] = Input.MouseLeftHold;
-                        Render.DrawBackgroundColor(new Vector2(positon.x, positon.y), next[positon.XI, positon.YI] ? Color.White : Color.Black);
+                        next[positon.XInt, positon.YInt] = Input.MouseLeftHold;
+                        Render.DrawBackgroundColor(new Vector2(positon.x, positon.y), next[positon.XInt, positon.YInt] ? Color.White : Color.Black);
                     }
                 }
             }

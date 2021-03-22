@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine
 {
-    public class Render
+    public static class Render
     {
         private static IntPtr consoleHandle;
         private static Kernel32.Generic.COORD dwWriteCoord = new Kernel32.Generic.COORD(0, 0);
@@ -14,7 +14,7 @@ namespace Engine
 
         internal static void Start()
         {
-            bufferLength = Game.Size.XI * Game.Size.YI;
+            bufferLength = Game.Size.XInt * Game.Size.YInt;
             textBuffer = new char[bufferLength];
             colorBuffer = new ushort[bufferLength];
             Clear();
@@ -53,8 +53,8 @@ namespace Engine
 
                 try
                 {
-                    Console.SetWindowSize(Game.Size.XI, Game.Size.YI);
-                    Console.SetBufferSize(Game.Size.XI, Game.Size.YI);
+                    Console.SetWindowSize(Game.Size.XInt, Game.Size.YInt);
+                    Console.SetBufferSize(Game.Size.XInt, Game.Size.YInt);
                     break;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -98,82 +98,55 @@ namespace Engine
             }
         }
 
-        //all draw methods needs a better way of handling Vector2, Vector2F, and float
-
         public static void DrawText(Vector2 position, char character)
         {
-            if (GetIndex(new Vector2(position.x, position.y), out int index))
-            {
-                textBuffer[index] = character;
-            }
+            DrawText(position.XInt, position.YInt, character);
         }
-        public static void DrawText(Vector2 position, string text)
+        public static void DrawText(float x, float y, char character)
         {
-            Vector2 positionI = new Vector2(position.x, position.y);
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (GetIndex(positionI + Vector2.Right * i, out int index))
-                {
-                    textBuffer[index] = text[i];
-                }
-            }
+            DrawText((int)x, (int)y, character);
         }
         public static void DrawText(int x, int y, char character)
         {
             if (GetIndex(new Vector2(x, y), out int index))
             {
-                textBuffer[index] = character;
+                DrawText(index, character);
             }
         }
-        public static void DrawText(int x, int y, string text)
+        public static void DrawText(Vector2 position, string text)
         {
-            Vector2 position = new Vector2(x, y);
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (GetIndex(position + Vector2.Right * i, out int index))
-                {
-                    textBuffer[index] = text[i];
-                }
-            }
-        }
-        public static void DrawText(float x, float y, char character)
-        {
-            if (GetIndex(new Vector2(x, y), out int index))
-            {
-                textBuffer[index] = character;
-            }
+            DrawText(position.XInt, position.YInt, text);
         }
         public static void DrawText(float x, float y, string text)
         {
-            Vector2 position = new Vector2(x, y);
+            DrawText((int)x, (int)y, text);
+        }
+        public static void DrawText(int x, int y, string text)
+        {
             for (int i = 0; i < text.Length; i++)
             {
-                if (GetIndex(position + Vector2.Right * i, out int index))
+                if (GetIndex(x + i, y, out int index))
                 {
-                    textBuffer[index] = text[i];
+                    DrawText(index, text[i]);
                 }
             }
+        }
+        public static void DrawText(int index, char character)
+        {
+            textBuffer[index] = character;
         }
 
         public static void DrawBackgroundColor(Vector2 position, Color color)
         {
-            if (GetIndex(new Vector2(position.x, position.y), out int index))
-            {
-                int textColor = (colorBuffer[index] | 240) ^ 240;
-                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
-            }
-        }
-        public static void DrawBackgroundColor(int x, int y, Color color)
-        {
-            if (GetIndex(new Vector2(x, y), out int index))
-            {
-                int textColor = (colorBuffer[index] | 240) ^ 240;
-                colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
-            }
+            DrawBackgroundColor(position.XInt, position.YInt, color);
         }
         public static void DrawBackgroundColor(float x, float y, Color color)
         {
-            if (GetIndex(new Vector2(x, y), out int index))
+            DrawBackgroundColor((int)x, (int)y, color);
+        }
+        public static void DrawBackgroundColor(int x, int y, Color color)
+        {
+            if (GetIndex(x, y, out int index))
             {
                 int textColor = (colorBuffer[index] | 240) ^ 240;
                 colorBuffer[index] = (ushort)((ushort)color << 4 | textColor);
@@ -182,37 +155,96 @@ namespace Engine
 
         public static void DrawTextColor(Vector2 position, Color color)
         {
-            if (GetIndex(new Vector2(position.x, position.y), out int index))
-            {
-                int backgroundColor = colorBuffer[index] >> 4 << 4;
-                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
-            }
-        }
-        public static void DrawTextColor(int x, int y, Color color)
-        {
-            if (GetIndex(new Vector2(x, y), out int index))
-            {
-                int backgroundColor = colorBuffer[index] >> 4 << 4;
-                colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
-            }
+            DrawTextColor(position.XInt, position.YInt, color);
         }
         public static void DrawTextColor(float x, float y, Color color)
         {
-            if (GetIndex(new Vector2(x, y), out int index))
+            DrawTextColor((int)x, (int)y, color);
+        }
+        public static void DrawTextColor(int x, int y, Color color)
+        {
+            if (GetIndex(x, y, out int index))
             {
                 int backgroundColor = colorBuffer[index] >> 4 << 4;
                 colorBuffer[index] = (ushort)(backgroundColor | (ushort)color);
             }
         }
 
-        //public static void DrawLine(Vector2 start, Vector2 end, Color color)
-       // {
-        //    Vector2F dir = (end - start)
-        //}
-
-        private static bool GetIndex(Vector2 position, out int index)
+        public static void DrawLine(Vector2 start, Vector2 end, Color color = Color.White)
         {
-            index = position.YI * Game.Size.XI + position.XI;
+            Vector2 rayDirection = (end - start).Normalized;
+            Vector2 rayLength = Vector2.Zero;
+
+            Vector2 stepSize = new Vector2(MathF.Sqrt(1 + (rayDirection.y / rayDirection.x) * (rayDirection.y / rayDirection.x)), MathF.Sqrt(1 + (rayDirection.x / rayDirection.y) * (rayDirection.x / rayDirection.y)));
+            Vector2 stepDirection = Vector2.Zero;
+            
+            Vector2 position = start;
+
+            if (rayDirection.x < 0)
+            {
+                stepDirection.x = -1;
+                rayLength.x = (start.x - position.x) * stepSize.x;
+            }
+            else
+            {
+                stepDirection.x = 1;
+                rayLength.x = (position.x + 1 - start.x) * stepSize.x;
+            }
+
+            if (rayDirection.y < 0)
+            {
+                stepDirection.y = -1;
+                rayLength.y = (start.y - position.y) * stepSize.y;
+            }
+            else
+            {
+                stepDirection.y = 1;
+                rayLength.y = (position.y + 1 - start.y) * stepSize.y;
+            }
+
+            float maxDistance = Vector2.Distance(start, end);
+            float distance = 0f;
+            while (distance < maxDistance)
+            {
+                if (rayLength.x < rayLength.y)
+                {
+                    position.x += stepDirection.x;
+                    distance = rayLength.x;
+                    rayLength.x += stepSize.x;
+                }
+                else
+                {
+                    position.y += stepDirection.y;
+                    distance = rayLength.y;
+                    rayLength.y += stepSize.y;
+                }
+
+                if (position.x >= 0 && position.x < Game.Size.x && position.y >= 0 && position.y < Game.Size.y)
+                {
+                    DrawBackgroundColor(position, color);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            DrawBackgroundColor(start, color);
+            DrawBackgroundColor(end, color);
+        }
+
+        public static bool GetIndex(Vector2 position, out int index)
+        {
+            GetIndex(position.XInt, position.YInt, out index);
+            return true;
+        }
+        public static bool GetIndex(float x, float y, out int index)
+        {
+            GetIndex((int)x, (int)y, out index);
+            return true;
+        }
+        public static bool GetIndex(int x, int y, out int index)
+        {
+            index = y * Game.Size.XInt + x;
             return true;
         }
     }

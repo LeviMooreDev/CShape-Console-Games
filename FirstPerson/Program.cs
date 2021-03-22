@@ -141,7 +141,7 @@ namespace FirstPerson
                     else
                     {
                         //hit wall
-                        if (map[hit.YI][hit.XI] == mapWall)
+                        if (map[hit.YInt][hit.XInt] == mapWall)
                         {
                             break;
                         }
@@ -150,7 +150,7 @@ namespace FirstPerson
 
                 //draw vertical
                 int ceilingStart = (int)(Game.Size.y / 2f - Game.Size.y / distanceToWall);
-                int floorStart = Game.Size.YI - ceilingStart;
+                int floorStart = Game.Size.YInt - ceilingStart;
 
                 for (int y = 0; y < Game.Size.y; y++)
                 {
